@@ -4,6 +4,10 @@
     align-items: center;
 }
 
+#profile-photo {
+    border: 1px solid #ea00ff
+}
+
 #my-bio {
     display: inline-block;
     font-style: normal;

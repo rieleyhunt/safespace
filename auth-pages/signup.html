@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Buddy Walking</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+    <header class="top-bar">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a href="../index.html" class="text-white text-decoration-none fw-bold logo">SpaceSpace</a>
+            <div class="d-flex gap-2">
+                <a href="../about.html" class="top-bar-buttons">About us</a>
+                <a href="login.html" class="top-bar-buttons">Sign in</a>
+                <a href="signup.html" class="top-bar-buttons">Sign up</a>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <h1 class="page-title">Join Buddy Walking</h1>
+
+        <div class="signup-split">
+            <!-- Left Side: User Sign Up -->
+            <div class="signup-section">
+                <div class="section-header">
+                    <h2>Sign up as a User</h2>
+                    <p>Find a walking buddy in your area</p>
+                    <button class="btn btn-primary" id="userSignupBtn">Start Sign Up</button>
+                </div>
+
+                <div class="form-container" id="userFormContainer">
+                    <form id="userSignupForm" class="signup-form">
+                        <div class="form-group">
+                            <label for="userFullName">Full Name <span class="required">*</span></label>
+                            <input type="text" id="userFullName" name="fullName" required>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="userEmail">Email <span class="required">*</span></label>
+                            <input type="email" id="userEmail" name="email" required>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="userPhone">Phone</label>
+                            <input type="tel" id="userPhone" name="phone">
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="userPassword">Password <span class="required">*</span></label>
+                            <input type="password" id="userPassword" name="password" required>
+                            <small>At least 8 characters, one letter and one number</small>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="userLocation">City / Postal Code <span class="required">*</span></label>
+                            <input type="text" id="userLocation" name="location" required>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Preferred Walking Times <span class="required">*</span></label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="walkingTimes" value="morning">
+                                    Morning
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="walkingTimes" value="afternoon">
+                                    Afternoon
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="walkingTimes" value="evening">
+                                    Evening
+                                </label>
+                            </div>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Walking Pace <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="walkingPace" value="slow" required>
+                                    Slow
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="walkingPace" value="medium">
+                                    Medium
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="walkingPace" value="fast">
+                                    Fast
+                                </label>
+                            </div>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="userEmergencyName">Emergency Contact Name</label>
+                            <input type="text" id="userEmergencyName" name="emergencyName">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="userEmergencyPhone">Emergency Contact Phone</label>
+                            <input type="tel" id="userEmergencyPhone" name="emergencyPhone">
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="userPhoto">Profile Photo</label>
+                            <input type="file" id="userPhoto" name="photo" accept="image/*">
+                            <small>Max 5MB</small>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label terms-checkbox">
+                                <input type="checkbox" id="userTerms" name="terms" required>
+                                I agree to the Terms of Use and Privacy Policy <span class="required">*</span>
+                            </label>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-submit">Create User Account</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Side: Buddy Application -->
+            <div class="signup-section">
+                <div class="section-header">
+                    <h2>Apply to Become a Buddy</h2>
+                    <p>Help others enjoy their walks safely</p>
+                    <button class="btn btn-primary" id="buddySignupBtn">Apply to Become a Buddy</button>
+                </div>
+
+                <div class="form-container" id="buddyFormContainer">
+                    <form id="buddySignupForm" class="signup-form">
+                        <div class="form-group">
+                            <label for="buddyFullName">Full Name <span class="required">*</span></label>
+                            <input type="text" id="buddyFullName" name="fullName" required>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buddyEmail">Email <span class="required">*</span></label>
+                            <input type="email" id="buddyEmail" name="email" required>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buddyPhone">Phone <span class="required">*</span></label>
+                            <input type="tel" id="buddyPhone" name="phone" required>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buddyPassword">Password <span class="required">*</span></label>
+                            <input type="password" id="buddyPassword" name="password" required>
+                            <small>At least 8 characters, one letter and one number</small>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buddyArea">Primary Walking Area <span class="required">*</span></label>
+                            <input type="text" id="buddyArea" name="walkingArea" required>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Availability <span class="required">*</span></label>
+                            <small>Select at least one day and time</small>
+                            <div class="availability-grid">
+                                <div class="day-group">
+                                    <strong>Days:</strong>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="availabilityDays" value="monday">
+                                        Monday
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="availabilityDays" value="tuesday">
+                                        Tuesday
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="availabilityDays" value="wednesday">
+                                        Wednesday
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="availabilityDays" value="thursday">
+                                        Thursday
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="availabilityDays" value="friday">
+                                        Friday
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="availabilityDays" value="saturday">
+                                        Saturday
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="availabilityDays" value="sunday">
+                                        Sunday
+                                    </label>
+                                </div>
+                                <div class="time-group">
+                                    <strong>Times:</strong>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="availabilityTimes" value="morning">
+                                        Morning
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="availabilityTimes" value="afternoon">
+                                        Afternoon
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="availabilityTimes" value="evening">
+                                        Evening
+                                    </label>
+                                </div>
+                            </div>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Walking Paces You Offer <span class="required">*</span></label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="walkingPaces" value="slow">
+                                    Slow
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="walkingPaces" value="medium">
+                                    Medium
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="walkingPaces" value="fast">
+                                    Fast
+                                </label>
+                            </div>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buddyBio">Short Bio</label>
+                            <textarea id="buddyBio" name="bio" maxlength="280" rows="4"></textarea>
+                            <small><span id="bioCharCount">0</span>/280 characters</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buddyPhoto">Profile Photo <span class="required">*</span></label>
+                            <input type="file" id="buddyPhoto" name="photo" accept="image/*" required>
+                            <small>Max 5MB</small>
+                            <div id="photoPreview" class="file-preview"></div>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <div class="trust-safety-section">
+                            <h3>Trust & Safety Documents</h3>
+                            <p class="section-info">All documents are required for buddy verification</p>
+
+                            <div class="form-group">
+                                <label for="buddyGovId">Government ID <span class="required">*</span></label>
+                                <input type="file" id="buddyGovId" name="govId" accept=".pdf,.png,.jpg,.jpeg" required>
+                                <small>PDF preferred, max 5MB</small>
+                                <span class="error-message"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buddyBackgroundCheck">Police Background Check <span class="required">*</span></label>
+                                <input type="file" id="buddyBackgroundCheck" name="backgroundCheck" accept=".pdf,.png,.jpg,.jpeg" required>
+                                <small>CPIC or Vulnerable Sector Check issued within last 12 months</small>
+                                <span class="error-message"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buddyProofAddress">Proof of Address <span class="required">*</span></label>
+                                <input type="file" id="buddyProofAddress" name="proofAddress" accept=".pdf,.png,.jpg,.jpeg" required>
+                                <small>Utility bill, bank statement, or government letter with your name & address</small>
+                                <span class="error-message"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-submit">Submit Buddy Application</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="signup.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
