@@ -1,9 +1,21 @@
-flex-center {
+.flex-center {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-grid {
-    display: grid;
+#my-bio {
+    display: inline-block;
+    font-style: normal;
+    margin: 10px 10px 0px 10px; /*top left bottom right*/
+}
+
+#my-education {
+    display: inline-block;
+    font-style: normal;
+}
+
+#my-interests {
+    display: inline-block;
+    font-style: normal;
 }
