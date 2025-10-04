@@ -1,4 +1,39 @@
 <!DOCTYPE html>
+<html>
+<head>
+
+
+<style>
+.flex-center {
+    display: flex;
+    justify-content: center
+}
+
+.pfp-img {
+    border: 2px solid #ea00ff; 
+    width: 150px; 
+    height: auto;
+}
+
+#my-bio {
+    display: inline-block;
+    font-style: normal;
+    margin: 10px 10px 0px 10px; /*top left bottom right*/
+}
+
+#my-education {
+    display: inline-block;
+    font-style: normal;
+}
+
+#my-interests {
+    display: inline-block;
+    font-style: normal;
+}
+
+
+</style>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -24,13 +59,12 @@
 
     <!-- photo, interests, education, bio = one to two sentences explaining your use of the app -->
 
-    <figure>
-        <div class="profile-photo">
-            <img src="https://t4.ftcdn.net/jpg/04/44/51/51/360_F_444515146_OZjAeY8m9l1bhyOaoYEewccvjThyAk6h.jpg" alt="User Profile Photo">
+    <div class="flex-center">
+        <figure>
+            <img class="pfp-img" src="https://t4.ftcdn.net/jpg/04/44/51/51/360_F_444515146_OZjAeY8m9l1bhyOaoYEewccvjThyAk6h.jpg" alt="User Profile Photo">
             <figcaption> This is me walking you home! </figcaption>
-        </div>
-    </figure>
-
+        </figure>
+    </div>
 
     <div class = "flex-center">
         <!-- box for education, bio and then interests -->

@@ -1,11 +1,12 @@
 .flex-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex !important;
+    justify-content: center !important;
 }
 
-#profile-photo {
-    border: 1px solid #ea00ff
+.imgClass {
+    width: 50% !important;
+    border: 2px solid #ea00ff !important; 
+    height: auto !important;
 }
 
 #my-bio {
