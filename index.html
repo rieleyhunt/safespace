@@ -10,4 +10,12 @@
     <button id="btn">Click me</button>
     <script src="index.js"></script>
 </body>
+
+<script>
+    document.getElementById('btn').addEventListener('click', async () => {
+        const response = await fetch('/button-clicked');
+        const data = await response.json();
+    });
+</script>
+
 </html>
