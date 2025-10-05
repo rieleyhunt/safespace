@@ -62,6 +62,10 @@ p {
 }
 
 .logo {
+    color: rgb(255, 242, 242);
+    text-decoration: none;
+    text-emphasis: strong;
+    font-size: 30px;
     transition:
         transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
