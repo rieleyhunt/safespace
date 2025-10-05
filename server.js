@@ -1,4 +1,6 @@
+require('dotenv').config();
 const express = require("express");
+const { checkDatabaseConnection } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -14,6 +16,12 @@ let volunteers = [
 let requests = [
   // Example: { id: 'req1', clientLat, clientLng, volunteerId, status: 'pending'|'accepted'|'declined'|'completed' }
 ];
+
+// ===== AUTH NOTE =====
+// Authentication is now handled entirely by Supabase on the frontend
+// No backend auth endpoints needed
+
+// ===== VOLUNTEER & REQUEST ENDPOINTS =====
 
 // Endpoint for volunteers to update their location (for demo/testing)
 app.post("/volunteer-location", (req, res) => {
@@ -142,5 +150,6 @@ app.get("/button-clicked", (req, res) => {
 });
 
 app.listen(PORT, () => {
+  checkDatabaseConnection();
   console.log(`Server is running on http://localhost:${PORT}`);
 });

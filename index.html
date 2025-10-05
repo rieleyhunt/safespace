@@ -15,8 +15,7 @@
                 <a href="index.html" class="text-white text-decoration-none fw-bold logo">SpaceSpace</a>
                 <div class="d-flex gap-2">
                     <a href="about.html" class="top-bar-buttons">About us</a>
-                    <a href="auth-pages/login.html" class="top-bar-buttons">Sign in</a>
-                    <a href="auth-pages/signup.html" class="top-bar-buttons">Sign up</a>
+                    <button onclick="AUTH.logout()" class="top-bar-buttons" style="background: none; border: none; cursor: pointer;">Logout</button>
                 </div>
             </div>
         </header>
@@ -35,8 +34,98 @@
             </div>
         </div>
 
-
         <!-- Attach all scripts here -->
+        <script type="module">
+          import { supabase } from './auth-pages/supabaseClient.js';
+          
+          // Make AUTH available globally
+          window.AUTH = {
+            async getSession() {
+              const { data: { session } } = await supabase.auth.getSession();
+              return session;
+            },
+            
+            async getUser() {
+              const { data: { user } } = await supabase.auth.getUser();
+              return user;
+            },
+            
+            async checkAuth() {
+              try {
+                const session = await this.getSession();
+                return session !== null;
+              } catch (error) {
+                console.error('Auth check failed:', error);
+                return false;
+              }
+            },
+            
+            async getUserProfile() {
+              try {
+                const user = await this.getUser();
+                if (!user) return null;
+                
+                // Check if user is in users table
+                const { data: userData } = await supabase
+                  .from('users')
+                  .select('*')
+                  .eq('id', user.id)
+                  .single();
+                
+                if (userData) {
+                  return { ...userData, userType: 'user' };
+                }
+                
+                // Check if user is in buddies table
+                const { data: buddyData } = await supabase
+                  .from('buddies')
+                  .select('*')
+                  .eq('id', user.id)
+                  .single();
+                
+                if (buddyData) {
+                  const { data: profileData } = await supabase
+                    .from('buddy_profiles')
+                    .select('*')
+                    .eq('buddy_id', user.id)
+                    .single();
+                  
+                  return { 
+                    ...buddyData, 
+                    profile: profileData,
+                    userType: 'buddy' 
+                  };
+                }
+                
+                return null;
+              } catch (error) {
+                console.error('Get user profile failed:', error);
+                return null;
+              }
+            },
+            
+            async logout() {
+              try {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                  console.error('Logout error:', error);
+                }
+                localStorage.removeItem('userType');
+              } catch (error) {
+                console.error('Logout failed:', error);
+              }
+              window.location.href = '/auth-pages/login.html';
+            }
+          };
+          
+          // Protect this page - redirect if not authenticated
+          (async () => {
+            const isAuthenticated = await AUTH.checkAuth();
+            if (!isAuthenticated) {
+              window.location.href = '/auth-pages/login.html';
+            }
+          })();
+        </script>
         <script src="main.js"></script>
 
         <!-- Bootstrap script, really useful for UI -->
