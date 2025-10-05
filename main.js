@@ -15,19 +15,22 @@ document.addEventListener("DOMContentLoaded", function () {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
-        map = new google.maps.Map(document.getElementById("map"), {
-          center: userLatLng,
-          zoom: 15,
-        });
-        userMarker = new google.maps.Marker({
-          position: userLatLng,
-          map,
-          title: "Your Location",
-          icon: {
-            url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%23007bff' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>U</text></svg>",
-            scaledSize: new google.maps.Size(32, 32),
-          },
-        });
+        const mapElem = document.getElementById("map");
+        if (mapElem) {
+          map = new google.maps.Map(mapElem, {
+            center: userLatLng,
+            zoom: 15,
+          });
+          userMarker = new google.maps.Marker({
+            position: userLatLng,
+            map,
+            title: "Your Location",
+            icon: {
+              url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%23007bff' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>U</text></svg>",
+              scaledSize: new google.maps.Size(32, 32),
+            },
+          });
+        }
       });
     }
   }
@@ -385,9 +388,13 @@ function initMap() {
 }
 // Automatically update volunteer location
 function startVolunteerAutoUpdate() {
-  const id = document.getElementById("volId").value;
-  const name = document.getElementById("volName").value;
-  const available = document.getElementById("volAvailable").value === "true";
+  const idElem = document.getElementById("volId");
+  const nameElem = document.getElementById("volName");
+  const availableElem = document.getElementById("volAvailable");
+  if (!idElem || !nameElem || !availableElem) return;
+  const id = idElem.value;
+  const name = nameElem.value;
+  const available = availableElem.value === "true";
   if (!id || !name) return; // Require ID and name
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
@@ -435,72 +442,83 @@ function startClientAutoUpdate() {
 }
 
 // Start auto-update when volunteer form fields change
-document
-  .getElementById("volId")
-  .addEventListener("change", startVolunteerAutoUpdate);
-document
-  .getElementById("volName")
-  .addEventListener("change", startVolunteerAutoUpdate);
-document
-  .getElementById("volAvailable")
-  .addEventListener("change", startVolunteerAutoUpdate);
-const volId = document.getElementById("volId");
-if (volId) volId.addEventListener("change", startVolunteerAutoUpdate);
-const volName = document.getElementById("volName");
-if (volName) volName.addEventListener("change", startVolunteerAutoUpdate);
-const volAvailable = document.getElementById("volAvailable");
-if (volAvailable)
-  volAvailable.addEventListener("change", startVolunteerAutoUpdate);
+
 
 // Start auto-update for client and auto-fill volunteer location on page load
 window.addEventListener("DOMContentLoaded", function () {
+  document
+  document
+
+  const volId = document.getElementById("volId");
+  if (volId) volId.addEventListener("change", startVolunteerAutoUpdate);
+
+  const volName = document.getElementById("volName");
+  if (volName) volName.addEventListener("change", startVolunteerAutoUpdate);
+
+  const volAvailable = document.getElementById("volAvailable");
+  if (volAvailable) volAvailable.addEventListener("change", startVolunteerAutoUpdate);
   startClientAutoUpdate();
   // Also auto-fill volunteer location fields
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function (position) {
-      document.getElementById("volLat").value = position.coords.latitude;
-      document.getElementById("volLng").value = position.coords.longitude;
+      const volLat = document.getElementById("volLat");
+      const volLng = document.getElementById("volLng");
+      if (volLat) volLat.value = position.coords.latitude;
+      if (volLng) volLng.value = position.coords.longitude;
     });
   }
 });
 // Autofill volunteer location using Geolocation API
-document.getElementById("volGeoBtn").addEventListener("click", function () {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function (position) {
-        document.getElementById("volLat").value = position.coords.latitude;
-        document.getElementById("volLng").value = position.coords.longitude;
-      },
-      function (error) {
-        alert("Unable to retrieve your location.");
-      }
-    );
-  } else {
-    alert("Geolocation is not supported by your browser.");
-  }
-});
+const volGeoBtn = document.getElementById("volGeoBtn");
+if (volGeoBtn) {
+  volGeoBtn.addEventListener("click", function () {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          const volLat = document.getElementById("volLat");
+          const volLng = document.getElementById("volLng");
+          if (volLat) volLat.value = position.coords.latitude;
+          if (volLng) volLng.value = position.coords.longitude;
+        },
+        function (error) {
+          alert("Unable to retrieve your location.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  });
+}
 
 // Autofill client location using Geolocation API
-document.getElementById("clientGeoBtn").addEventListener("click", function () {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function (position) {
-        document.getElementById("clientLat").value = position.coords.latitude;
-        document.getElementById("clientLng").value = position.coords.longitude;
-      },
-      function (error) {
-        alert("Unable to retrieve your location.");
-      }
-    );
-  } else {
-    alert("Geolocation is not supported by your browser.");
-  }
-});
-document.getElementById("btn").addEventListener("click", async () => {
-  const response = await fetch("/button-clicked");
-  const data = await response.json();
-  console.log(data.message);
-});
+const clientGeoBtn = document.getElementById("clientGeoBtn");
+if (clientGeoBtn) {
+  clientGeoBtn.addEventListener("click", function () {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          const clientLat = document.getElementById("clientLat");
+          const clientLng = document.getElementById("clientLng");
+          if (clientLat) clientLat.value = position.coords.latitude;
+          if (clientLng) clientLng.value = position.coords.longitude;
+        },
+        function (error) {
+          alert("Unable to retrieve your location.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  });
+}
+const btn = document.getElementById("btn");
+if (btn) {
+  btn.addEventListener("click", async () => {
+    const response = await fetch("/button-clicked");
+    const data = await response.json();
+    console.log(data.message);
+  });
+}
 
 // Sample: Update volunteer location
 async function updateVolunteerLocation(id, name, lat, lng, available = true) {
@@ -565,37 +583,57 @@ async function volunteerRespond(requestId, volunteerId, response) {
 }
 
 // Volunteer form handler
-document
-  .getElementById("volunteerForm")
-  .addEventListener("submit", async function (e) {
+const volunteerForm = document.getElementById("volunteerForm");
+if (volunteerForm) {
+  volunteerForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-    const id = document.getElementById("volId").value;
-    const name = document.getElementById("volName").value;
-    const lat = parseFloat(document.getElementById("volLat").value);
-    const lng = parseFloat(document.getElementById("volLng").value);
-    const available = document.getElementById("volAvailable").value === "true";
-    await updateVolunteerLocation(id, name, lat, lng, available);
+    const idElem = document.getElementById("volId");
+    const nameElem = document.getElementById("volName");
+    const latElem = document.getElementById("volLat");
+    const lngElem = document.getElementById("volLng");
+    const availableElem = document.getElementById("volAvailable");
+    if (idElem && nameElem && latElem && lngElem && availableElem) {
+      const id = idElem.value;
+      const name = nameElem.value;
+      const lat = parseFloat(latElem.value);
+      const lng = parseFloat(lngElem.value);
+      const available = availableElem.value === "true";
+      await updateVolunteerLocation(id, name, lat, lng, available);
+    }
     // ...no UI feedback for backend test...
   });
+}
 
 // Client form handler
-document
-  .getElementById("clientForm")
-  .addEventListener("submit", async function (e) {
+const clientForm = document.getElementById("clientForm");
+if (clientForm) {
+  clientForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-    const lat = parseFloat(document.getElementById("clientLat").value);
-    const lng = parseFloat(document.getElementById("clientLng").value);
-    const radiusKm = parseFloat(document.getElementById("clientRadius").value);
-    await requestHelp(lat, lng, radiusKm);
+    const latElem = document.getElementById("clientLat");
+    const lngElem = document.getElementById("clientLng");
+    const radiusElem = document.getElementById("clientRadius");
+    if (latElem && lngElem && radiusElem) {
+      const lat = parseFloat(latElem.value);
+      const lng = parseFloat(lngElem.value);
+      const radiusKm = parseFloat(radiusElem.value);
+      await requestHelp(lat, lng, radiusKm);
+    }
   });
+}
 
 // Volunteer response form handler (for demo)
-document
-  .getElementById("volunteerResponseForm")
-  ?.addEventListener("submit", async function (e) {
+const volunteerResponseForm = document.getElementById("volunteerResponseForm");
+if (volunteerResponseForm) {
+  volunteerResponseForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-    const requestId = document.getElementById("responseRequestId").value;
-    const volunteerId = document.getElementById("responseVolunteerId").value;
-    const response = document.getElementById("responseAction").value;
-    await volunteerRespond(requestId, volunteerId, response);
+    const requestIdElem = document.getElementById("responseRequestId");
+    const volunteerIdElem = document.getElementById("responseVolunteerId");
+    const responseElem = document.getElementById("responseAction");
+    if (requestIdElem && volunteerIdElem && responseElem) {
+      const requestId = requestIdElem.value;
+      const volunteerId = volunteerIdElem.value;
+      const response = responseElem.value;
+      await volunteerRespond(requestId, volunteerId, response);
+    }
   });
+}
