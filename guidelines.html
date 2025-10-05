@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeSpace Guidelines - Stay Safe, Stay Connected</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .guidelines-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .guidelines-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .guideline-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+            border-left: 5px solid #ea00ff;
+        }
+
+        .guideline-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .guideline-icon {
+            background: linear-gradient(135deg, #ea00ff, #fae2fc);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .safety-level {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .safety-critical {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .safety-important {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .safety-recommended {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .emergency-section {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+
+        .dos-donts {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .do-item {
+            border-left: 4px solid #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .dont-item {
+            border-left: 4px solid #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .verification-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .stats-section {
+            background: linear-gradient(135deg, #fae2fc, #ffffff);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <header class="top-bar">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a href="index.html" class="text-white text-decoration-none fw-bold logo">SafeSpace</a>
+            <div class="d-flex gap-2">
+                <a href="about.html" class="top-bar-buttons">About us</a>
+                <a href="auth-pages/login.html" class="top-bar-buttons">Sign in</a>
+                <a href="auth-pages/signup.html" class="top-bar-buttons">Sign up</a>
+                <a href="profile.html" class="top-bar-buttons">Profile</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="guidelines-hero">
+        <div class="container position-relative">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-4">🛡️ SafeSpace Guidelines</h1>
+                    <p class="lead mb-4">Your safety is our priority. Follow these guidelines to ensure secure, positive walking experiences for everyone in our community.</p>
+                    <div class="verification-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Verified Safety Standards</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Guidelines Content -->
+    <main class="py-5">
+        <div class="container">
+            <!-- Safety Levels Overview -->
+            <div class="row mb-5">
+                <div class="col-12 text-center mb-4">
+                    <h2 class="fw-bold" style="color: #ea00ff;">Safety Priority Levels</h2>
+                    <p class="text-muted">Understanding our safety classification system</p>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <span class="safety-critical">Critical</span>
+                    <p class="mt-2 small">Non-negotiable safety requirements</p>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <span class="safety-important">Important</span>
+                    <p class="mt-2 small">Strongly recommended practices</p>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <span class="safety-recommended">Recommended</span>
+                    <p class="mt-2 small">Best practices for optimal experience</p>
+                </div>
+            </div>
+
+            <!-- Core Safety Guidelines -->
+            <div class="row g-4 mb-5">
+                <div class="col-lg-4 col-md-6">
+                    <div class="guideline-card">
+                        <div class="guideline-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <span class="safety-critical mb-2">Critical</span>
+                        <h4 class="fw-bold mb-3" style="color: #2c3e50;">Identity Verification</h4>
+                        <p class="mb-3">All walking buddies must complete comprehensive identity verification including government ID, background check, and address verification.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Government-issued photo ID</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Police background check (12 months)</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Proof of address</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Reference verification</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="guideline-card">
+                        <div class="guideline-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <span class="safety-critical mb-2">Critical</span>
+                        <h4 class="fw-bold mb-3" style="color: #2c3e50;">Meet in Public</h4>
+                        <p class="mb-3">Always meet your walking buddy in well-lit, populated public areas. Never meet at private residences or isolated locations.</p>
+                        <div class="mt-3">
+                            <strong class="text-success">✓ Recommended locations:</strong>
+                            <ul class="mt-2">
+                                <li>Community centers</li>
+                                <li>Shopping mall entrances</li>
+                                <li>Popular park entrances</li>
+                                <li>Transit stations</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="guideline-card">
+                        <div class="guideline-icon">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <span class="safety-important mb-2">Important</span>
+                        <h4 class="fw-bold mb-3" style="color: #2c3e50;">Stay Connected</h4>
+                        <p class="mb-3">Maintain communication with trusted contacts and use our in-app safety features throughout your walk.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-primary me-2"></i>Share your route with a friend</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>Enable location sharing</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>Carry a charged phone</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>Know emergency contacts</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="guideline-card">
+                        <div class="guideline-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <span class="safety-recommended mb-2">Recommended</span>
+                        <h4 class="fw-bold mb-3" style="color: #2c3e50;">Timing Guidelines</h4>
+                        <p class="mb-3">Plan your walks during appropriate hours and communicate clearly about duration and expectations.</p>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>Daylight hours:</strong> Preferred for first meetings<br>
+                                <strong>Evening walks:</strong> Well-lit areas only<br>
+                                <strong>Duration:</strong> 30-90 minutes recommended
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="guideline-card">
+                        <div class="guideline-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <span class="safety-important mb-2">Important</span>
+                        <h4 class="fw-bold mb-3" style="color: #2c3e50;">Communication</h4>
+                        <p class="mb-3">Maintain respectful, clear communication and establish boundaries early in your walking partnership.</p>
+                        <ul class="list-unstyled small">
+                            <li><i class="fas fa-check text-primary me-2"></i>Use SafeSpace messaging system</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>Confirm meetings 2 hours prior</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>Respect personal boundaries</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>Report inappropriate behavior</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="guideline-card">
+                        <div class="guideline-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <span class="safety-critical mb-2">Critical</span>
+                        <h4 class="fw-bold mb-3" style="color: #2c3e50;">Trust Your Instincts</h4>
+                        <p class="mb-3">If something feels wrong, trust your gut. You have the right to end any walk or interaction at any time.</p>
+                        <div class="mt-3">
+                            <small class="fw-bold text-danger">
+                                🚨 Red flags: Pressure to change location, inappropriate comments, refusing to verify identity, making you uncomfortable
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Do's and Don'ts Section -->
+            <div class="dos-donts">
+                <h3 class="fw-bold mb-4 text-center" style="color: #ea00ff;">Do's and Don'ts</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="text-success fw-bold mb-3">✓ DO</h5>
+                        <div class="do-item">
+                            <strong>Verify your buddy's profile</strong><br>
+                            <small>Check verification badges and read reviews from other users</small>
+                        </div>
+                        <div class="do-item">
+                            <strong>Start with short, daytime walks</strong><br>
+                            <small>Build trust gradually with 30-45 minute walks in familiar areas</small>
+                        </div>
+                        <div class="do-item">
+                            <strong>Bring emergency contacts</strong><br>
+                            <small>Have ICE contacts saved and share your location with trusted friends</small>
+                        </div>
+                        <div class="do-item">
+                            <strong>Rate and review after walks</strong><br>
+                            <small>Help build a trustworthy community by providing honest feedback</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-danger fw-bold mb-3">✗ DON'T</h5>
+                        <div class="dont-item">
+                            <strong>Share personal information too quickly</strong><br>
+                            <small>Keep home address, workplace, and financial details private initially</small>
+                        </div>
+                        <div class="dont-item">
+                            <strong>Walk alone in isolated areas</strong><br>
+                            <small>Avoid empty parks, construction sites, or poorly lit areas</small>
+                        </div>
+                        <div class="dont-item">
+                            <strong>Ignore your comfort zone</strong><br>
+                            <small>Never feel pressured to extend walks or visit unfamiliar areas</small>
+                        </div>
+                        <div class="dont-item">
+                            <strong>Meet unverified users</strong><br>
+                            <small>Only walk with buddies who have completed full verification</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Procedures -->
+            <div class="emergency-section">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center">
+                        <i class="fas fa-ambulance fa-3x mb-3"></i>
+                    </div>
+                    <div class="col-md-10">
+                        <h3 class="fw-bold mb-3">🚨 Emergency Procedures</h3>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6 class="fw-bold">Immediate Danger</h6>
+                                <p class="mb-0">Call 911 immediately<br>Use phone's emergency SOS if available</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="fw-bold">SafeSpace Emergency</h6>
+                                <p class="mb-0">Use in-app panic button<br>Contact: 1-800-SAFE-123</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="fw-bold">Non-Emergency Issues</h6>
+                                <p class="mb-0">Report through app<br>Email: support@safespace.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Community Statistics -->
+            <div class="stats-section">
+                <h3 class="fw-bold mb-4 text-center" style="color: #ea00ff;">SafeSpace Community Impact</h3>
+                <div class="row text-center">
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="display-4 fw-bold" style="color: #ea00ff;">2,847</div>
+                        <small class="text-muted">Verified Walking Buddies</small>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="display-4 fw-bold" style="color: #ea00ff;">98.7%</div>
+                        <small class="text-muted">Positive Experience Rate</small>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="display-4 fw-bold" style="color: #ea00ff;">15,392</div>
+                        <small class="text-muted">Safe Walks Completed</small>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="display-4 fw-bold" style="color: #ea00ff;">24/7</div>
+                        <small class="text-muted">Safety Support Available</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="text-center py-5">
+                <h3 class="fw-bold mb-3" style="color: #2c3e50;">Ready to Walk Safely?</h3>
+                <p class="lead mb-4">Join thousands of women who trust SafeSpace for their walking adventures</p>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="auth-pages/signup.html" class="btn btn-lg" style="background: linear-gradient(135deg, #ea00ff, #fae2fc); color: white; border: none; padding: 12px 30px;">
+                        <i class="fas fa-user-plus me-2"></i>Sign Up Now
+                    </a>
+                    <a href="about.html" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-info-circle me-2"></i>Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="fw-bold">SafeSpace Guidelines</h6>
+                    <p class="mb-0 small">These guidelines are updated regularly based on community feedback and safety research.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small>Last updated: October 2025 | Version 2.1</small><br>
+                    <a href="mailto:safety@safespace.com" class="text-light text-decoration-none small">
+                        <i class="fas fa-envelope me-1"></i>safety@safespace.com
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    
+    <script>
+        // Add smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add animation on scroll for guideline cards
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.guideline-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

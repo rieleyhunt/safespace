@@ -37,7 +37,7 @@ p {
     color: white;
     padding: 10px 0;
     text-align: center;
-    font-size: 1.5em;
+    font-size: 1em;
     font-weight: bold;
 }
 
@@ -62,6 +62,10 @@ p {
 }
 
 .logo {
+    color: rgb(255, 242, 242);
+    text-decoration: none;
+    text-emphasis: strong;
+    font-size: 30px;
     transition:
         transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -146,12 +150,13 @@ p {
 }
 
 .signup-section {
-    background: white;
+    background: #ea00ff;
     border-radius: 12px;
     padding: 30px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease;
 }
+
 
 .signup-section:hover {
     transform: translateY(-5px);
@@ -163,13 +168,12 @@ p {
 }
 
 .section-header h2 {
-    color: #2c3e50;
+    color: #fff5f5;
     margin-bottom: 10px;
     font-size: 1.8rem;
 }
-
 .section-header p {
-    color: #7f8c8d;
+    color: #f4feff;
     margin-bottom: 20px;
 }
 
@@ -186,7 +190,7 @@ p {
 
 /* Buttons */
 .btn {
-    color: #54016d;
+    color: #000000;
     padding: 12px 30px;
     border: none;
     border-radius: 8px;
@@ -199,19 +203,19 @@ p {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #54016d;
+    background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+    color: #000000 !important;
     width: 100%;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4);
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, #4a148c 100%, #4a148c 100%);
-    color: #54016d;
+    background: linear-gradient(135deg, #efe2ff 100%, #eddeff 100%);
+    color: #ffffff;
     width: 100%;
     margin-top: 20px;
     font-size: 1.1rem;
@@ -494,9 +498,7 @@ p {
 }
 
 @media (max-width: 576px) {
-    body {
-        padding: 10px;
-    }
+    
 
     .signup-section,
     .login-container {
