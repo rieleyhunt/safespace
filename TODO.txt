@@ -1,5 +1,5 @@
 
-Main focus
+Main focus:
 
 Authentication: Mamadou
 
@@ -7,7 +7,7 @@ Matching system (similar to uber):
 
 Main page:
 
-About us:
+About us: rieley
 
 
 If we have time at the end:

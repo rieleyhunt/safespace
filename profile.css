@@ -1,0 +1,26 @@
+.flex-center {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.imgClass {
+    width: 50% !important;
+    border: 2px solid #ea00ff !important; 
+    height: auto !important;
+}
+
+#my-bio {
+    display: inline-block;
+    font-style: normal;
+    margin: 10px 10px 0px 10px; /*top left bottom right*/
+}
+
+#my-education {
+    display: inline-block;
+    font-style: normal;
+}
+
+#my-interests {
+    display: inline-block;
+    font-style: normal;
+}

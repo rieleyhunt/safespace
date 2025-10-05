@@ -1,13 +1,19 @@
 /* I love styles! */
 
+:root {
+    --theme-pink: #fae2fc;
+
+}
+
 h1 {
     font-family: 'Arial Black', sans-serif;
-    color: #ea00ff;
+    color: var(--theme-pink);
     text-align: center;
 }
 
 p {
     font-family: sans-serif;
+    color: var(--theme-pink);
 }
 
 .container {
@@ -33,15 +39,66 @@ p {
 }
 
 .top-bar-buttons {
-    color: white;
+    color: var(--theme-pink);
     text-decoration: none;
     margin: 0 10px;
     padding: 5px 10px;
     border: 2px solid white;
     border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s;
+    transition: 
+        background-color 1s, 
+        color 1s,
+        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.2s;
 }
 .top-bar-buttons:hover {
-    background-color: white;
+    background-color: var(--theme-pink);
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     color: #ea00ff;
+}
+
+.logo {
+    transition:
+        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.logo:hover {
+    transform: scale(1.1);
+}
+
+.bg-image {
+    min-height:100vh;
+    overflow: hidden;
+    background-image: url('assets/woman-walking-at-night.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative; 
+}
+
+.box-content {
+    background-color: #ea00ff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.box-content h1 {
+    font-family: 'Arial Black', sans-serif;
+    color: #fae2fc !important;
+    text-align: center;
+}
+
+.box-body-content {
+    background-color: #54016d;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    padding: 2rem;
+    margin-top: 2rem;
+}
+.box-body-content p {
+    font-family: sans-serif;
+    color: #fae2fc;
+    text-align: left;
 }
