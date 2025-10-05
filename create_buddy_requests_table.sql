@@ -13,6 +13,9 @@ CREATE TABLE IF NOT EXISTS buddy_requests (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Enable real-time for this table
+ALTER PUBLICATION supabase_realtime ADD TABLE buddy_requests;
+
 -- Create index for faster queries
 CREATE INDEX IF NOT EXISTS idx_buddy_requests_buddy_id ON buddy_requests(buddy_id);
 CREATE INDEX IF NOT EXISTS idx_buddy_requests_status ON buddy_requests(status);

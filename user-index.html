@@ -57,7 +57,7 @@
     </div>
   </body>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSy993VOiMVlKygiJf587UwDDAmH0wUNA&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSy993VOiMVlKygiJf587UwDDAmH0wUNA&libraries=places,marker"></script>
     <script type="module">
       import { supabase } from './auth-pages/supabaseClient.js';
       
@@ -86,11 +86,12 @@
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
-          console.error('No authenticated user found');
+          console.error('[USER] No authenticated user found');
           return;
         }
         
         currentUserId = user.id;
+        console.log('[USER] User authenticated:', currentUserId);
         localStorage.setItem('user_id', currentUserId);
         
         if (navigator.geolocation) {
@@ -180,7 +181,7 @@
       // SIMPLIFIED: Use server endpoint for buddy matching (local in-memory matching)
       window.findNearbyBuddy = async function(userLat, userLng, radiusKm = 5) {
         try {
-          console.log('Finding nearby buddies via server endpoint...');
+          console.log('[USER] Finding nearby buddies via server endpoint...');
           
           // Call simplified server endpoint that does in-memory matching
           const response = await fetch('/request-help', {
@@ -192,15 +193,21 @@
           const data = await response.json();
           
           if (!data.success) {
-            console.log('No buddy found:', data.message);
+            console.log('[USER] No buddy found:', data.message);
             return { success: false, message: data.message };
           }
           
-          console.log('Found buddy:', data.volunteer.name);
-          return { success: true, volunteer: data.volunteer, requestId: data.requestId };
+          console.log('[USER] Found buddies:', data.buddies);
+          // Return the buddies array for main.js to process
+          return { 
+            success: true, 
+            buddies: data.buddies,  // This is what main.js expects
+            volunteer: data.volunteer,  // Keep for backwards compatibility
+            count: data.count 
+          };
           
         } catch (err) {
-          console.error('Error finding buddy:', err);
+          console.error('[USER] Error finding buddy:', err);
           return { success: false, message: 'Error connecting to server' };
         }
       };
@@ -208,9 +215,18 @@
       // Make findBuddy function available globally for main.js
       window.createBuddyRequest = async function(userLat, userLon, destLat, destLon, destination, buddyId) {
         if (!currentUserId) {
+          console.error('[USER] User not authenticated - currentUserId is null');
           alert('User not authenticated');
           return null;
         }
+        
+        console.log('[USER] Creating request with:', {
+          user_id: currentUserId,
+          buddy_id: buddyId,
+          user_lat: userLat,
+          user_lon: userLon,
+          destination
+        });
         
         try {
           const { data, error } = await supabase
@@ -229,14 +245,15 @@
             .single();
           
           if (error) {
-            console.error('Error creating request:', error);
+            console.error('[USER] Error creating request:', error);
             return null;
           }
           
+          console.log('[USER] Request created in database:', data);
           currentRequestId = data.id;
           return data;
         } catch (err) {
-          console.error('Failed to create buddy request:', err);
+          console.error('[USER] Failed to create buddy request:', err);
           return null;
         }
       };

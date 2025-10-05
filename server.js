@@ -131,6 +131,63 @@ app.get("/debug/volunteers", (req, res) => {
   });
 });
 
+// Debug endpoint to check buddy requests in database
+app.get("/debug/buddy-requests", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        br.id,
+        br.user_id,
+        br.buddy_id,
+        b.name as buddy_name,
+        br.status,
+        br.user_lat,
+        br.user_lon,
+        br.destination,
+        br.created_at,
+        br.updated_at
+      FROM buddy_requests br
+      LEFT JOIN buddies b ON b.id = br.buddy_id
+      ORDER BY br.created_at DESC
+      LIMIT 20
+    `);
+    
+    res.json({
+      count: result.rows.length,
+      requests: result.rows
+    });
+  } catch (err) {
+    console.error("Error fetching buddy requests:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// Debug endpoint to check all buddies
+app.get("/debug/buddies", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        b.id,
+        b.name,
+        b.email,
+        b.available,
+        b.created_at,
+        (SELECT COUNT(*) FROM buddy_live_locations bll WHERE bll.buddy_id = b.id) as location_count,
+        (SELECT MAX(updated_at) FROM buddy_live_locations bll WHERE bll.buddy_id = b.id) as last_location_update
+      FROM buddies b
+      ORDER BY b.created_at DESC
+    `);
+    
+    res.json({
+      count: result.rows.length,
+      buddies: result.rows
+    });
+  } catch (err) {
+    console.error("Error fetching buddies:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
 // Simple distance function (Haversine formula)
 function getDistance(lat1, lng1, lat2, lng2) {
   function toRad(x) {

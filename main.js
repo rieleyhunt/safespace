@@ -10,25 +10,34 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize map with only user marker
   if (window.google && window.google.maps) {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function (position) {
+      navigator.geolocation.getCurrentPosition(async function (position) {
         const userLatLng = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
         const mapElem = document.getElementById("map");
         if (mapElem) {
-          map = new google.maps.Map(mapElem, {
+          const { Map } = await google.maps.importLibrary("maps");
+          const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+          
+          map = new Map(mapElem, {
             center: userLatLng,
             zoom: 15,
+            mapId: "USER_MAP"
           });
-          userMarker = new google.maps.Marker({
+          
+          const userPin = new PinElement({
+            background: "#007bff",
+            borderColor: "white",
+            glyphColor: "white",
+            glyph: "U"
+          });
+          
+          userMarker = new AdvancedMarkerElement({
             position: userLatLng,
             map,
             title: "Your Location",
-            icon: {
-              url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%23007bff' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>U</text></svg>",
-              scaledSize: new google.maps.Size(32, 32),
-            },
+            content: userPin.element
           });
         }
       });
@@ -71,15 +80,21 @@ document.addEventListener("DOMContentLoaded", function () {
           });
           destLatLng = { lat: geocodeResult.lat(), lng: geocodeResult.lng() };
           // Show destination marker
-          if (destinationMarker) destinationMarker.setMap(null);
-          destinationMarker = new google.maps.Marker({
+          if (destinationMarker) destinationMarker.map = null;
+          
+          const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+          const destPin = new PinElement({
+            background: "#d50000",
+            borderColor: "white",
+            glyphColor: "white",
+            glyph: "D"
+          });
+          
+          destinationMarker = new AdvancedMarkerElement({
             position: destLatLng,
             map,
             title: "Destination",
-            icon: {
-              url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%23d50000' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>D</text></svg>",
-              scaledSize: new google.maps.Size(32, 32),
-            },
+            content: destPin.element
           });
           map.setCenter(destLatLng);
         } catch (err) {
@@ -98,20 +113,29 @@ document.addEventListener("DOMContentLoaded", function () {
           lat: closestBuddy.lat,
           lng: closestBuddy.lon,
         };
-        if (buddyMarker) buddyMarker.setMap(null);
-        buddyMarker = new google.maps.Marker({
+        if (buddyMarker) buddyMarker.map = null;
+        
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+        const buddyPin = new PinElement({
+          background: "#00c853",
+          borderColor: "white",
+          glyphColor: "white",
+          glyph: "B"
+        });
+        
+        buddyMarker = new AdvancedMarkerElement({
           position: buddyLatLng,
           map,
           title: "Closest Buddy",
-          icon: {
-            url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%2300c853' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>",
-            scaledSize: new google.maps.Size(32, 32),
-          },
+          content: buddyPin.element
         });
         
         // Create buddy requests for ALL nearby buddies
+        console.log(`[USER] Creating requests for ${data.buddies.length} buddies:`, data.buddies.map(b => ({ id: b.id, name: b.name })));
+        
         let successCount = 0;
         for (const buddy of data.buddies) {
+          console.log(`[USER] Sending request to buddy: ${buddy.name} (${buddy.id})`);
           const requestData = await window.createBuddyRequest(
             lat,
             lng,
@@ -120,8 +144,15 @@ document.addEventListener("DOMContentLoaded", function () {
             address || 'No destination specified',
             buddy.id
           );
-          if (requestData) successCount++;
+          if (requestData) {
+            console.log(`[USER] ✓ Request created successfully for ${buddy.name}:`, requestData);
+            successCount++;
+          } else {
+            console.error(`[USER] ✗ Failed to create request for ${buddy.name}`);
+          }
         }
+        
+        console.log(`[USER] Total requests created: ${successCount}/${data.buddies.length}`);
         
         if (successCount > 0) {
           statusDiv.innerHTML = `<span style="color: orange;">📤 Request sent to ${successCount} nearby ${successCount === 1 ? 'buddy' : 'buddies'}. Waiting for response...</span>`;

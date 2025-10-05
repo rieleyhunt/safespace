@@ -60,7 +60,7 @@
         </div>
       </div>
     </div>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSy993VOiMVlKygiJf587UwDDAmH0wUNA&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSy993VOiMVlKygiJf587UwDDAmH0wUNA&libraries=places,marker"></script>
     <script type="module">
       import { supabase } from './auth-pages/supabaseClient.js';
       
@@ -68,19 +68,28 @@
       let currentRequest = null;
       let map, buddyMarker, clientMarker, destinationMarker;
 
-      function initMap(lat, lon) {
-        map = new google.maps.Map(document.getElementById("map"), {
+      async function initMap(lat, lon) {
+        const { Map } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+        
+        map = new Map(document.getElementById("map"), {
           center: { lat, lng: lon },
           zoom: 15,
+          mapId: "BUDDY_MAP"
         });
-        buddyMarker = new google.maps.Marker({
+        
+        const buddyPin = new PinElement({
+          background: "#007bff",
+          borderColor: "white",
+          glyphColor: "white",
+          glyph: "B"
+        });
+        
+        buddyMarker = new AdvancedMarkerElement({
           position: { lat, lng: lon },
           map,
           title: "Your Location",
-          icon: {
-            url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%23007bff' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>",
-            scaledSize: new google.maps.Size(32, 32),
-          },
+          content: buddyPin.element
         });
       }
 
@@ -124,37 +133,57 @@
         noRequestsMsg.style.display = 'none';
         
         // Show client marker
-        if (clientMarker) clientMarker.setMap(null);
-        clientMarker = new google.maps.Marker({
-          position: { lat: request.user_lat, lng: request.user_lon },
-          map,
-          title: "User Location",
-          icon: {
-            url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%23d50000' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>U</text></svg>",
-            scaledSize: new google.maps.Size(32, 32),
-          },
-        });
+        if (clientMarker) clientMarker.map = null;
+        
+        (async () => {
+          const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+          
+          const userPin = new PinElement({
+            background: "#d50000",
+            borderColor: "white",
+            glyphColor: "white",
+            glyph: "U"
+          });
+          
+          clientMarker = new AdvancedMarkerElement({
+            position: { lat: request.user_lat, lng: request.user_lon },
+            map,
+            title: "User Location",
+            content: userPin.element
+          });
+        })();
         
         // Show destination marker if available
         if (request.destination_lat && request.destination_lon) {
-          if (destinationMarker) destinationMarker.setMap(null);
-          destinationMarker = new google.maps.Marker({
-            position: { lat: request.destination_lat, lng: request.destination_lon },
-            map,
-            title: "Destination",
-            icon: {
-              url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%2300c853' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>D</text></svg>",
-              scaledSize: new google.maps.Size(32, 32),
-            },
-          });
+          if (destinationMarker) destinationMarker.map = null;
+          
+          (async () => {
+            const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+            
+            const destPin = new PinElement({
+              background: "#00c853",
+              borderColor: "white",
+              glyphColor: "white",
+              glyph: "D"
+            });
+            
+            destinationMarker = new AdvancedMarkerElement({
+              position: { lat: request.destination_lat, lng: request.destination_lon },
+              map,
+              title: "Destination",
+              content: destPin.element
+            });
+          })();
         }
         
         // Center map to show all markers
-        const bounds = new google.maps.LatLngBounds();
-        bounds.extend(buddyMarker.getPosition());
-        bounds.extend(clientMarker.getPosition());
-        if (destinationMarker) bounds.extend(destinationMarker.getPosition());
-        map.fitBounds(bounds);
+        setTimeout(() => {
+          const bounds = new google.maps.LatLngBounds();
+          bounds.extend(buddyMarker.position);
+          if (clientMarker) bounds.extend(clientMarker.position);
+          if (destinationMarker) bounds.extend(destinationMarker.position);
+          map.fitBounds(bounds);
+        }, 100);
       }
       
       // Calculate distance using Haversine formula
@@ -179,8 +208,9 @@
         }
         
         currentBuddyId = user.id;
+        console.log('[BUDDY] Setting up real-time listener for buddy:', currentBuddyId);
         
-        // Listen for new requests
+        // Listen for new requests (INSERT)
         const channel = supabase
           .channel('buddy-incoming-requests')
           .on(
@@ -192,13 +222,40 @@
               filter: `buddy_id=eq.${currentBuddyId}`
             },
             (payload) => {
-              console.log('New request received:', payload);
-              showRequest(payload.new);
+              console.log('[BUDDY] New request received:', payload.new);
+              // Only show if no current request or if current request is not pending
+              if (!currentRequest || currentRequest.status !== 'pending') {
+                console.log('[BUDDY] Displaying request:', payload.new.id);
+                showRequest(payload.new);
+              } else {
+                console.log('[BUDDY] Request queued (current request active):', payload.new.id);
+              }
+            }
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'buddy_requests',
+              filter: `buddy_id=eq.${currentBuddyId}`
+            },
+            (payload) => {
+              console.log('Request updated:', payload);
+              // If the current request was accepted/declined by another buddy, hide it
+              if (currentRequest && currentRequest.id === payload.new.id) {
+                if (payload.new.status === 'accepted' || payload.new.status === 'declined') {
+                  hideCurrentRequest();
+                  // Check for next pending request
+                  checkForNextRequest();
+                }
+              }
             }
           )
           .subscribe();
         
         // Check for existing pending requests
+        console.log('[BUDDY] Checking for existing pending requests...');
         const { data: existingRequests } = await supabase
           .from('buddy_requests')
           .select('*')
@@ -207,14 +264,48 @@
           .order('created_at', { ascending: false })
           .limit(1);
         
+        console.log('[BUDDY] Existing pending requests:', existingRequests);
         if (existingRequests && existingRequests.length > 0) {
+          console.log('[BUDDY] Showing existing request:', existingRequests[0].id);
           showRequest(existingRequests[0]);
+        } else {
+          console.log('[BUDDY] No existing requests found. Waiting for new requests...');
+        }
+      }
+      
+      // Hide current request
+      function hideCurrentRequest() {
+        document.getElementById('requestSection').style.display = 'none';
+        document.getElementById('noRequestsMsg').innerHTML = '<p>Request no longer available. Waiting for new requests...</p>';
+        document.getElementById('noRequestsMsg').style.display = 'block';
+        
+        // Clear markers
+        if (clientMarker) clientMarker.map = null;
+        if (destinationMarker) destinationMarker.map = null;
+        
+        currentRequest = null;
+      }
+      
+      // Check for next pending request
+      async function checkForNextRequest() {
+        const { data: nextRequests } = await supabase
+          .from('buddy_requests')
+          .select('*')
+          .eq('buddy_id', currentBuddyId)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        if (nextRequests && nextRequests.length > 0) {
+          showRequest(nextRequests[0]);
         }
       }
 
       // Accept request
       async function acceptRequest() {
         if (!currentRequest) return;
+        
+        console.log('[BUDDY] Accepting request:', currentRequest.id);
         
         try {
           const { error } = await supabase
@@ -223,10 +314,12 @@
             .eq('id', currentRequest.id);
           
           if (error) {
-            console.error('Error accepting request:', error);
+            console.error('[BUDDY] Error accepting request:', error);
             alert('Failed to accept request. Please try again.');
             return;
           }
+          
+          console.log('[BUDDY] Request accepted successfully:', currentRequest.id);
           
           // Hide request section
           document.getElementById('requestSection').style.display = 'none';
@@ -235,7 +328,7 @@
           
           currentRequest = null;
         } catch (err) {
-          console.error('Failed to accept request:', err);
+          console.error('[BUDDY] Failed to accept request:', err);
           alert('Failed to accept request. Please try again.');
         }
       }
@@ -244,6 +337,8 @@
       async function declineRequest() {
         if (!currentRequest) return;
         
+        console.log('[BUDDY] Declining request:', currentRequest.id);
+        
         try {
           const { error } = await supabase
             .from('buddy_requests')
@@ -251,10 +346,12 @@
             .eq('id', currentRequest.id);
           
           if (error) {
-            console.error('Error declining request:', error);
+            console.error('[BUDDY] Error declining request:', error);
             alert('Failed to decline request. Please try again.');
             return;
           }
+          
+          console.log('[BUDDY] Request declined successfully:', currentRequest.id);
           
           // Hide request section
           document.getElementById('requestSection').style.display = 'none';
@@ -262,12 +359,15 @@
           document.getElementById('noRequestsMsg').style.display = 'block';
           
           // Clear markers
-          if (clientMarker) clientMarker.setMap(null);
-          if (destinationMarker) destinationMarker.setMap(null);
+          if (clientMarker) clientMarker.map = null;
+          if (destinationMarker) destinationMarker.map = null;
           
           currentRequest = null;
+          
+          // Check for next pending request
+          checkForNextRequest();
         } catch (err) {
-          console.error('Failed to decline request:', err);
+          console.error('[BUDDY] Failed to decline request:', err);
           alert('Failed to decline request. Please try again.');
         }
       }
