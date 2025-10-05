@@ -67,6 +67,7 @@
             console.error('Logout error:', error);
           }
           localStorage.removeItem('userType');
+          localStorage.removeItem('user_id');
           window.location.href = '/index.html';
         } catch (error) {
           console.error('Logout failed:', error);
@@ -75,6 +76,61 @@
       
       // Make logout available globally
       window.logout = logout;
+      
+      // Start tracking user location when page loads
+      async function startUserLocationTracking() {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          console.error('No authenticated user found');
+          return;
+        }
+        
+        const user_id = user.id;
+        localStorage.setItem('user_id', user_id);
+        
+        if (navigator.geolocation) {
+          // Get initial location and update database
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              
+              await fetch('/user-location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id, lat, lon })
+              });
+              
+              console.log('Initial user location updated');
+            },
+            (error) => {
+              console.error('Error getting user location:', error);
+            }
+          );
+          
+          // Continuously track location
+          navigator.geolocation.watchPosition(
+            async (position) => {
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              
+              await fetch('/user-location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id, lat, lon })
+              });
+            },
+            (error) => {
+              console.error('Error tracking user location:', error);
+            },
+            { enableHighAccuracy: true }
+          );
+        }
+      }
+      
+      // Start tracking when page loads
+      startUserLocationTracking();
     </script>
     <script src="main.js"></script>
 </html>

@@ -160,6 +160,7 @@
             console.error('Logout error:', error);
           }
           localStorage.removeItem('userType');
+          localStorage.removeItem('user_id');
           window.location.href = '/index.html';
         } catch (error) {
           console.error('Logout failed:', error);
@@ -168,6 +169,70 @@
       
       // Make logout available globally
       window.logout = logout;
+      
+      // Start tracking buddy location when page loads
+      async function startBuddyLocationTracking() {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          console.error('No authenticated user found');
+          return;
+        }
+        
+        const buddy_id = user.id;
+        localStorage.setItem('user_id', buddy_id);
+        
+        // Get buddy name from database
+        const { data: buddyData } = await supabase
+          .from('buddies')
+          .select('name')
+          .eq('id', buddy_id)
+          .single();
+        
+        const buddyName = buddyData?.name || 'Buddy';
+        
+        if (navigator.geolocation) {
+          // Get initial location and update database
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const lat = position.coords.latitude;
+              const lng = position.coords.longitude;
+              
+              await fetch('/volunteer-location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: buddy_id, name: buddyName, lat, lng, available: true })
+              });
+              
+              console.log('Initial buddy location updated');
+            },
+            (error) => {
+              console.error('Error getting buddy location:', error);
+            }
+          );
+          
+          // Continuously track location
+          navigator.geolocation.watchPosition(
+            async (position) => {
+              const lat = position.coords.latitude;
+              const lng = position.coords.longitude;
+              
+              await fetch('/volunteer-location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: buddy_id, name: buddyName, lat, lng, available: true })
+              });
+            },
+            (error) => {
+              console.error('Error tracking buddy location:', error);
+            },
+            { enableHighAccuracy: true }
+          );
+        }
+      }
+      
+      // Start tracking when page loads
+      startBuddyLocationTracking();
     </script>
   </body>
 </html>
