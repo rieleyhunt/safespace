@@ -1,6 +1,6 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
-const { checkDatabaseConnection } = require('./db');
+const { checkDatabaseConnection } = require("./db");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -22,6 +22,73 @@ let requests = [
 // No backend auth endpoints needed
 
 // ===== VOLUNTEER & REQUEST ENDPOINTS =====
+// Get buddy availability
+app.get("/api/buddy/:id/availability", async (req, res) => {
+  const buddyId = req.params.id;
+  try {
+    const result = await pool.query(
+      "SELECT available FROM buddies WHERE id = $1",
+      [buddyId]
+    );
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Buddy not found." });
+    }
+    res.json({ success: true, available: result.rows[0].available });
+  } catch (err) {
+    console.error("DB error in GET /api/buddy/:id/availability:", err);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+});
+
+// Toggle buddy availability
+app.post("/api/buddy/:id/toggle-availability", async (req, res) => {
+  const buddyId = req.params.id;
+  try {
+    // Get current availability
+    const result = await pool.query(
+      "SELECT available FROM buddies WHERE id = $1",
+      [buddyId]
+    );
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Buddy not found." });
+    }
+    const current = result.rows[0].available;
+    const newValue = !current;
+    await pool.query("UPDATE buddies SET available = $1 WHERE id = $2", [
+      newValue,
+      buddyId,
+    ]);
+    res.json({ success: true, available: newValue });
+  } catch (err) {
+    console.error("DB error in POST /api/buddy/:id/toggle-availability:", err);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+});
+// Endpoint for users to update their live location
+app.post("/user-location", async (req, res) => {
+  const { user_id, lat, lon } = req.body;
+  if (!user_id || lat == null || lon == null) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing user_id, lat, or lon." });
+  }
+  try {
+    // Insert new location entry
+    await pool.query(
+      `INSERT INTO user_live_locations (user_id, lat, lon, updated_at)
+       VALUES ($1, $2, $3, NOW())`,
+      [user_id, lat, lon]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error("DB error in /user-location:", err);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+});
 
 // Endpoint for volunteers to update their location (for demo/testing)
 app.post("/volunteer-location", (req, res) => {
@@ -55,41 +122,62 @@ function getDistance(lat1, lng1, lat2, lng2) {
 }
 
 // Matching endpoint: client requests help, auto-assign closest volunteer
-app.post("/request-help", (req, res) => {
+const { pool } = require("./db");
+app.post("/request-help", async (req, res) => {
   const { lat, lng, radiusKm = 5 } = req.body;
-  // Find available volunteers within radius
-  const nearby = volunteers.filter(
-    (v) => v.available && getDistance(lat, lng, v.lat, v.lng) <= radiusKm
-  );
-  if (nearby.length === 0) {
-    return res.json({
-      success: false,
-      message: "No volunteers available nearby.",
-    });
-  }
-  // Auto-assign closest volunteer
-  let closest = nearby[0];
-  let minDist = getDistance(lat, lng, closest.lat, closest.lng);
-  for (let v of nearby) {
-    const dist = getDistance(lat, lng, v.lat, v.lng);
-    if (dist < minDist) {
-      closest = v;
-      minDist = dist;
+  try {
+    // Get all available buddies and their latest location
+    const buddiesQuery = `
+      SELECT b.id, b.name, b.email, b.address, b.available, bl.lat, bl.lon
+      FROM buddies b
+      JOIN LATERAL (
+        SELECT lat, lon
+        FROM buddy_live_locations
+        WHERE buddy_id = b.id
+        ORDER BY updated_at DESC
+        LIMIT 1
+      ) bl ON true
+      WHERE b.available = true
+    `;
+    const { rows: buddies } = await pool.query(buddiesQuery);
+    // Filter by radius
+    const nearby = buddies.filter(
+      (buddy) => getDistance(lat, lng, buddy.lat, buddy.lon) <= radiusKm
+    );
+    if (nearby.length === 0) {
+      return res.json({
+        success: false,
+        message: "No volunteers available nearby.",
+      });
     }
+    // Find closest
+    let closest = nearby[0];
+    let minDist = getDistance(lat, lng, closest.lat, closest.lon);
+    for (let b of nearby) {
+      const dist = getDistance(lat, lng, b.lat, b.lon);
+      if (dist < minDist) {
+        closest = b;
+        minDist = dist;
+      }
+    }
+    // Mark buddy as unavailable
+    await pool.query("UPDATE buddies SET available = false WHERE id = $1", [
+      closest.id,
+    ]);
+    // Create request (optional: store in DB)
+    const reqId = "req_" + Date.now();
+    requests.push({
+      id: reqId,
+      clientLat: lat,
+      clientLng: lng,
+      volunteerId: closest.id,
+      status: "pending",
+    });
+    res.json({ success: true, requestId: reqId, volunteer: closest });
+  } catch (err) {
+    console.error("DB error in /request-help:", err);
+    res.status(500).json({ success: false, message: "Server error." });
   }
-  // Mark volunteer as busy
-  const vIdx = volunteers.findIndex((v) => v.id === closest.id);
-  if (vIdx > -1) volunteers[vIdx].available = false;
-  // Create request
-  const reqId = "req_" + Date.now();
-  requests.push({
-    id: reqId,
-    clientLat: lat,
-    clientLng: lng,
-    volunteerId: closest.id,
-    status: "pending",
-  });
-  res.json({ success: true, requestId: reqId, volunteer: closest });
 });
 
 // Volunteer response endpoint (accept/decline)

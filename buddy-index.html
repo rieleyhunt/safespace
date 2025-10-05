@@ -1,41 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
     <title>SafeSpace: For Women</title>
-</head>
-    <body>
-        <!-- Adding a top bar here that will be reused -->
-        <header class="top-bar">
-            <div class="container-fluid d-flex justify-content-between align-items-center">
-                <a href="index.html" class="text-white text-decoration-none fw-bold logo">SafeSpace</a>
-                <div class="d-flex gap-2">
-                    <a href="about.html" class="top-bar-buttons">About us</a>
-                    <a href="auth-pages/login.html" class="top-bar-buttons">Sign in</a>
-                    <a href="auth-pages/signup.html" class="top-bar-buttons">Sign up</a>
-                    <!-- Only display profile if signed in. Disabled Sign in and Sign up buttons when signed in -->
-                    <a href="../profile.html" class="top-bar-buttons">Profile</a>
-                </div>
-            </div>
-        </header>
-
-        <div class="bg-image">
-            <div class="container my-4 box-content">
-                <h1>Requests:</h1>
-                <p>Note to devs: Essentially on user-index.html, someone will locate a buddy nearby and select their desired buddy based on their stats
-                    and other characteristics. Those requests will appear here as a list where a buddy can accept or decline them.
-                </p>
-                <div class="box-body-content">
-                    <h1>REQUESTS</h1>
-                </div>
-                <div class="box-body-content">
-                    <h1>MAP</h1>
-                </div>
+  </head>
+  <body>
+    <!-- Adding a top bar here that will be reused -->
+    <header class="top-bar">
+      <div
+        class="container-fluid d-flex justify-content-between align-items-center"
+      >
+        <a
+          href="index.html"
+          class="text-white text-decoration-none fw-bold logo"
+          >SafeSpace</a
+        >
+        <div class="d-flex gap-2">
+          <a href="about.html" class="top-bar-buttons">About us</a>
+          <a href="auth-pages/login.html" class="top-bar-buttons">Sign in</a>
+          <a href="auth-pages/signup.html" class="top-bar-buttons">Sign up</a>
+          <!-- Only display profile if signed in. Disabled Sign in and Sign up buttons when signed in -->
+          <a href="../profile.html" class="top-bar-buttons">Profile</a>
         </div>
-
+      </div>
+    </header>
+    <div class="bg-image">
+      <div class="container my-4 box-content">
+        <h1>Requests:</h1>
+        <p>
+          Note to devs: Essentially on user-index.html, someone will locate a
+          buddy nearby and select their desired buddy based on their stats and
+          other characteristics. Those requests will appear here as a list where
+          a buddy can accept or decline them.
+        </p>
+        <div class="box-body-content">
+          <h1>REQUESTS</h1>
+          <div id="requestSection" style="margin-top: 2rem; display: none">
+            <h3>Incoming Request</h3>
+            <div id="requestInfo" style="margin-bottom: 1rem"></div>
+            <button
+              id="acceptBtn"
+              class="btn btn-success"
+              style="margin-right: 1rem"
+            >
+              Accept
+            </button>
+            <button id="declineBtn" class="btn btn-danger">Decline</button>
+          </div>
         </div>
-    </body>
+        <div class="box-body-content">
+          <h1>MAP</h1>
+          <div
+            id="map"
+            style="height: 400px; width: 100%; margin-bottom: 16px"
+          ></div>
+        </div>
+      </div>
+    </div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSy993VOiMVlKygiJf587UwDDAmH0wUNA&libraries=places"></script>
+    <script>
+      // Replace with actual buddy ID from session/auth
+      const buddyId = localStorage.getItem("buddyId") || "1";
+      let map, buddyMarker, clientMarker, destinationMarker;
+
+      function initMap(lat, lon) {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat, lng: lon },
+          zoom: 15,
+        });
+        buddyMarker = new google.maps.Marker({
+          position: { lat, lng: lon },
+          map,
+          title: "Your Location",
+          icon: {
+            url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%23007bff' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>",
+            scaledSize: new google.maps.Size(32, 32),
+          },
+        });
+      }
+
+      // Get buddy's current location from backend
+      async function fetchBuddyLocation() {
+        try {
+          // Replace with actual backend endpoint for buddy location
+          // For demo, use geolocation
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (pos) {
+              initMap(pos.coords.latitude, pos.coords.longitude);
+            });
+          }
+        } catch (err) {
+          // fallback: default location
+          initMap(40.7128, -74.006);
+        }
+      }
+
+      // Simulate incoming request (replace with backend polling or websocket)
+      function showRequest(request) {
+        const infoDiv = document.getElementById("requestInfo");
+        infoDiv.innerHTML = `
+                <b>Client Location:</b> (${request.clientLat}, ${request.clientLng})<br>
+                <b>Destination:</b> ${request.destination}
+            `;
+        // Show client marker
+        if (clientMarker) clientMarker.setMap(null);
+        clientMarker = new google.maps.Marker({
+          position: { lat: request.clientLat, lng: request.clientLng },
+          map,
+          title: "Client Location",
+          icon: {
+            url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%23d50000' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>C</text></svg>",
+            scaledSize: new google.maps.Size(32, 32),
+          },
+        });
+        // Show destination marker
+        if (destinationMarker) destinationMarker.setMap(null);
+        destinationMarker = new google.maps.Marker({
+          position: { lat: request.destLat, lng: request.destLng },
+          map,
+          title: "Destination",
+          icon: {
+            url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%2300c853' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>D</text></svg>",
+            scaledSize: new google.maps.Size(32, 32),
+          },
+        });
+      }
+
+      // Accept/Decline logic
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("acceptBtn")
+          .addEventListener("click", async () => {
+            // Notify backend of acceptance
+            // Replace with actual requestId and backend call
+            alert("Accepted! You will be shown the client route.");
+            // TODO: Show route on map
+          });
+
+        document
+          .getElementById("declineBtn")
+          .addEventListener("click", async () => {
+            // Notify backend of decline
+            // Replace with actual requestId and backend call
+            alert("Declined! The client will be notified.");
+          });
+      });
+
+      fetchBuddyLocation();
+
+      // TODO: Listen for real incoming requests from backend (polling, websocket, etc.)
+    </script>
+  </body>
 </html>

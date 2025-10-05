@@ -47,7 +47,7 @@ document.getElementById('userSignupForm').addEventListener('submit', async (e) =
           // Store user type for later use
           localStorage.setItem('userType', 'user');
           alert('Signup successful! Welcome to SafeSpace!');
-          window.location.href = '/index.html';
+          window.location.href = '/user-index.html';
         }
       }
     }
@@ -120,7 +120,7 @@ document.getElementById('buddySignupForm').addEventListener('submit', async (e) 
           // Store user type for later use
           localStorage.setItem('userType', 'buddy');
           alert('Buddy application submitted! Welcome to SafeSpace!');
-          window.location.href = '/index.html';
+          window.location.href = '/buddy-index.html';
         }
       }
     }

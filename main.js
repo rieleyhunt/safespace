@@ -1,3 +1,115 @@
+// Find Buddy button logic for user-index.html
+let userMarker = null;
+let destinationMarker = null;
+let buddyMarker = null;
+let map = null;
+
+document.addEventListener("DOMContentLoaded", function () {
+  const findBuddyBtn = document.getElementById("findBuddyBtn");
+  const destinationInput = document.getElementById("destinationInput");
+  // Initialize map with only user marker
+  if (window.google && window.google.maps) {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function (position) {
+        const userLatLng = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: userLatLng,
+          zoom: 15,
+        });
+        userMarker = new google.maps.Marker({
+          position: userLatLng,
+          map,
+          title: "Your Location",
+          icon: {
+            url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%23007bff' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>U</text></svg>",
+            scaledSize: new google.maps.Size(32, 32),
+          },
+        });
+      });
+    }
+  }
+  if (findBuddyBtn) {
+    findBuddyBtn.addEventListener("click", async function () {
+      // Get user location
+      let lat = 40.7128;
+      let lng = -74.006;
+      if (navigator.geolocation) {
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          lat = pos.coords.latitude;
+          lng = pos.coords.longitude;
+        } catch (e) {}
+      }
+      // Geocode destination
+      let destLatLng = null;
+      const address = destinationInput.value.trim();
+      if (address) {
+        const geocoder = new google.maps.Geocoder();
+        try {
+          const geocodeResult = await new Promise((resolve, reject) => {
+            geocoder.geocode({ address }, (results, status) => {
+              if (status === "OK" && results[0]) {
+                resolve(results[0].geometry.location);
+              } else {
+                reject("Geocoding failed");
+              }
+            });
+          });
+          destLatLng = { lat: geocodeResult.lat(), lng: geocodeResult.lng() };
+          // Show destination marker
+          if (destinationMarker) destinationMarker.setMap(null);
+          destinationMarker = new google.maps.Marker({
+            position: destLatLng,
+            map,
+            title: "Destination",
+            icon: {
+              url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%23d50000' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>D</text></svg>",
+              scaledSize: new google.maps.Size(32, 32),
+            },
+          });
+          map.setCenter(destLatLng);
+        } catch (err) {
+          alert("Could not find destination location.");
+          return;
+        }
+      }
+      // Call backend to find buddy
+      const res = await fetch("/request-help", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lat, lng, radiusKm: 5 }),
+      });
+      const data = await res.json();
+      if (data.success && data.volunteer) {
+        // Show buddy marker
+        const buddyLatLng = {
+          lat: data.volunteer.lat,
+          lng: data.volunteer.lon,
+        };
+        if (buddyMarker) buddyMarker.setMap(null);
+        buddyMarker = new google.maps.Marker({
+          position: buddyLatLng,
+          map,
+          title: "Buddy Location",
+          icon: {
+            url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%2300c853' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>",
+            scaledSize: new google.maps.Size(32, 32),
+          },
+        });
+        alert(
+          `Buddy found!\nName: ${data.volunteer.name}\nLocation: (${data.volunteer.lat}, ${data.volunteer.lon})`
+        );
+      } else {
+        alert(data.message || "No buddy found nearby.");
+      }
+    });
+  }
+});
 // Google Maps: Show client, volunteer, and destination markers
 function initMap() {
   // Show weather info for client location
@@ -275,9 +387,23 @@ function startVolunteerAutoUpdate() {
 function startClientAutoUpdate() {
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
-      function (position) {
-        document.getElementById("clientLat").value = position.coords.latitude;
-        document.getElementById("clientLng").value = position.coords.longitude;
+      async function (position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        // Update UI if needed
+        const latInput = document.getElementById("clientLat");
+        const lonInput = document.getElementById("clientLng");
+        if (latInput) latInput.value = lat;
+        if (lonInput) lonInput.value = lon;
+        // Send location to backend
+        const user_id = localStorage.getItem("user_id");
+        if (user_id) {
+          await fetch("/user-location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id, lat, lon }),
+          });
+        }
       },
       function (error) {
         console.log("Unable to auto-update client location:", error);
