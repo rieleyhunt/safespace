@@ -14,8 +14,8 @@
                 <a href="index.html" class="text-white text-decoration-none fw-bold logo">SafeSpace</a>
                 <div class="d-flex gap-2">
                     <a href="about.html" class="top-bar-buttons">About us</a>
-                    <a href="profile.html" class="top-bar-buttons">Profile</a>
-                    <button onclick="AUTH.logout()" class="top-bar-buttons" style="background: none; border: none; cursor: pointer;">Logout</button>
+                    <a href="auth-pages/login.html" class="top-bar-buttons">Sign in</a>
+                    <a href="auth-pages/signup.html" class="top-bar-buttons">Sign up</a>
                 </div>
             </div>
         </header>
@@ -124,11 +124,18 @@
             }
           };
           
-          // Protect this page - redirect if not authenticated
+          // Auto-redirect authenticated users to their dashboard
           (async () => {
             const isAuthenticated = await AUTH.checkAuth();
-            if (!isAuthenticated) {
-              window.location.href = '/auth-pages/login.html';
+            if (isAuthenticated) {
+              const userProfile = await AUTH.getUserProfile();
+              if (userProfile) {
+                if (userProfile.userType === 'user') {
+                  window.location.href = '/user-index.html';
+                } else if (userProfile.userType === 'buddy') {
+                  window.location.href = '/buddy-index.html';
+                }
+              }
             }
           })();
         </script>

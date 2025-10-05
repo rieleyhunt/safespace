@@ -15,20 +15,12 @@
   <body>
     <!-- Adding a top bar here that will be reused -->
     <header class="top-bar">
-      <div
-        class="container-fluid d-flex justify-content-between align-items-center"
-      >
-        <a
-          href="index.html"
-          class="text-white text-decoration-none fw-bold logo"
-          >SafeSpace</a
-        >
+      <div class="container-fluid d-flex justify-content-between align-items-center">
+        <a href="index.html" class="text-white text-decoration-none fw-bold logo">SafeSpace</a>
         <div class="d-flex gap-2">
           <a href="about.html" class="top-bar-buttons">About us</a>
-          <a href="auth-pages/login.html" class="top-bar-buttons">Sign in</a>
-          <a href="auth-pages/signup.html" class="top-bar-buttons">Sign up</a>
-          <!-- Only display profile if signed in. Disabled Sign in and Sign up buttons when signed in -->
-          <a href="../profile.html" class="top-bar-buttons">Profile</a>
+          <a href="profile.html" class="top-bar-buttons">Profile</a>
+          <button onclick="logout()" class="top-bar-buttons" style="background: none; border: none; cursor: pointer;">Logout</button>
         </div>
       </div>
     </header>
@@ -157,6 +149,25 @@
       fetchBuddyLocation();
 
       // TODO: Listen for real incoming requests from backend (polling, websocket, etc.)
+    </script>
+    <script type="module">
+      import { supabase } from './auth-pages/supabaseClient.js';
+      
+      async function logout() {
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            console.error('Logout error:', error);
+          }
+          localStorage.removeItem('userType');
+          window.location.href = '/index.html';
+        } catch (error) {
+          console.error('Logout failed:', error);
+        }
+      }
+      
+      // Make logout available globally
+      window.logout = logout;
     </script>
   </body>
 </html>
