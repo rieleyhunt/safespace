@@ -123,6 +123,14 @@ app.post("/volunteer-location", async (req, res) => {
   }
 });
 
+// Debug endpoint to see available buddies
+app.get("/debug/volunteers", (req, res) => {
+  res.json({ 
+    count: volunteers.length,
+    volunteers: volunteers 
+  });
+});
+
 // Simple distance function (Haversine formula)
 function getDistance(lat1, lng1, lat2, lng2) {
   function toRad(x) {
