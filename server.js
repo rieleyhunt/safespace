@@ -90,17 +90,37 @@ app.post("/user-location", async (req, res) => {
   }
 });
 
-// Endpoint for volunteers to update their location (for demo/testing)
-app.post("/volunteer-location", (req, res) => {
+// Endpoint for volunteers/buddies to update their location
+app.post("/volunteer-location", async (req, res) => {
   const { id, name, lat, lng, available } = req.body;
-  // Update or add volunteer
-  const idx = volunteers.findIndex((v) => v.id === id);
-  if (idx > -1) {
-    volunteers[idx] = { id, name, lat, lng, available };
-  } else {
-    volunteers.push({ id, name, lat, lng, available });
+  
+  if (!id || lat == null || lng == null) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing id, lat, or lng." });
   }
-  res.json({ success: true });
+  
+  try {
+    // Insert new location entry into buddy_live_locations table
+    await pool.query(
+      `INSERT INTO buddy_live_locations (buddy_id, lat, lon, updated_at)
+       VALUES ($1, $2, $3, NOW())`,
+      [id, lat, lng]
+    );
+    
+    // Also update in-memory array for backwards compatibility
+    const idx = volunteers.findIndex((v) => v.id === id);
+    if (idx > -1) {
+      volunteers[idx] = { id, name, lat, lng, available };
+    } else {
+      volunteers.push({ id, name, lat, lng, available });
+    }
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error("DB error in /volunteer-location:", err);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
 });
 
 // Simple distance function (Haversine formula)
