@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const { checkDatabaseConnection } = require("./db");
+const { pool, checkDatabaseConnection } = require("./db");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -141,63 +141,79 @@ function getDistance(lat1, lng1, lat2, lng2) {
   return R * c;
 }
 
-// Matching endpoint: client requests help, auto-assign closest volunteer
-const { pool } = require("./db");
-app.post("/request-help", async (req, res) => {
+// SIMPLIFIED Matching endpoint: Uses in-memory volunteers array for matching
+// Location data is still stored in database, but matching happens locally
+app.post("/request-help", (req, res) => {
   const { lat, lng, radiusKm = 5 } = req.body;
-  try {
-    // Get all available buddies and their latest location
-    const buddiesQuery = `
-      SELECT b.id, b.name, b.email, b.address, b.available, bl.lat, bl.lon
-      FROM buddies b
-      JOIN LATERAL (
-        SELECT lat, lon
-        FROM buddy_live_locations
-        WHERE buddy_id = b.id
-        ORDER BY updated_at DESC
-        LIMIT 1
-      ) bl ON true
-      WHERE b.available = true
-    `;
-    const { rows: buddies } = await pool.query(buddiesQuery);
-    // Filter by radius
-    const nearby = buddies.filter(
-      (buddy) => getDistance(lat, lng, buddy.lat, buddy.lon) <= radiusKm
-    );
-    if (nearby.length === 0) {
-      return res.json({
-        success: false,
-        message: "No volunteers available nearby.",
-      });
-    }
-    // Find closest
-    let closest = nearby[0];
-    let minDist = getDistance(lat, lng, closest.lat, closest.lon);
-    for (let b of nearby) {
-      const dist = getDistance(lat, lng, b.lat, b.lon);
-      if (dist < minDist) {
-        closest = b;
-        minDist = dist;
-      }
-    }
-    // Mark buddy as unavailable
-    await pool.query("UPDATE buddies SET available = false WHERE id = $1", [
-      closest.id,
-    ]);
-    // Create request (optional: store in DB)
-    const reqId = "req_" + Date.now();
-    requests.push({
-      id: reqId,
-      clientLat: lat,
-      clientLng: lng,
-      volunteerId: closest.id,
-      status: "pending",
+  
+  console.log(`[MATCH] Request from (${lat}, ${lng}) with radius ${radiusKm}km`);
+  console.log(`[MATCH] Available volunteers in memory:`, volunteers.length);
+  
+  // Filter available volunteers by radius (using in-memory array)
+  const available = volunteers.filter(v => v.available === true);
+  console.log(`[MATCH] Available buddies:`, available.length);
+  
+  if (available.length === 0) {
+    return res.json({
+      success: false,
+      message: "No volunteers available. Please ensure buddies are online and have shared their location.",
     });
-    res.json({ success: true, requestId: reqId, volunteer: closest });
-  } catch (err) {
-    console.error("DB error in /request-help:", err);
-    res.status(500).json({ success: false, message: "Server error." });
   }
+  
+  const nearby = available.filter(
+    (buddy) => getDistance(lat, lng, buddy.lat, buddy.lng) <= radiusKm
+  );
+  
+  console.log(`[MATCH] Nearby buddies within ${radiusKm}km:`, nearby.length);
+  
+  if (nearby.length === 0) {
+    return res.json({
+      success: false,
+      message: `No volunteers available within ${radiusKm}km. Try increasing the search radius.`,
+    });
+  }
+  
+  // Find closest buddy
+  let closest = nearby[0];
+  let minDist = getDistance(lat, lng, closest.lat, closest.lng);
+  
+  for (let b of nearby) {
+    const dist = getDistance(lat, lng, b.lat, b.lng);
+    if (dist < minDist) {
+      closest = b;
+      minDist = dist;
+    }
+  }
+  
+  console.log(`[MATCH] Found closest buddy: ${closest.name} at ${minDist.toFixed(2)}km`);
+  
+  // Mark buddy as unavailable in memory
+  const idx = volunteers.findIndex(v => v.id === closest.id);
+  if (idx > -1) {
+    volunteers[idx].available = false;
+  }
+  
+  // Create request in memory
+  const reqId = "req_" + Date.now();
+  requests.push({
+    id: reqId,
+    clientLat: lat,
+    clientLng: lng,
+    volunteerId: closest.id,
+    status: "pending",
+  });
+  
+  res.json({ 
+    success: true, 
+    requestId: reqId, 
+    volunteer: {
+      id: closest.id,
+      name: closest.name,
+      lat: closest.lat,
+      lon: closest.lng,
+      distance: minDist
+    }
+  });
 });
 
 // Volunteer response endpoint (accept/decline)
