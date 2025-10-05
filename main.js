@@ -33,6 +33,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   if (findBuddyBtn) {
     findBuddyBtn.addEventListener("click", async function () {
+      const statusDiv = document.getElementById('requestStatus');
+      statusDiv.innerHTML = '<span style="color: blue;">🔍 Finding nearby buddy...</span>';
+      
       // Get user location
       let lat = 40.7128;
       let lng = -74.006;
@@ -43,8 +46,11 @@ document.addEventListener("DOMContentLoaded", function () {
           });
           lat = pos.coords.latitude;
           lng = pos.coords.longitude;
-        } catch (e) {}
+        } catch (e) {
+          console.error('Geolocation error:', e);
+        }
       }
+      
       // Geocode destination
       let destLatLng = null;
       const address = destinationInput.value.trim();
@@ -74,10 +80,11 @@ document.addEventListener("DOMContentLoaded", function () {
           });
           map.setCenter(destLatLng);
         } catch (err) {
-          alert("Could not find destination location.");
+          statusDiv.innerHTML = '<span style="color: red;">Could not find destination location.</span>';
           return;
         }
       }
+      
       // Call backend to find buddy
       const res = await fetch("/request-help", {
         method: "POST",
@@ -85,6 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
         body: JSON.stringify({ lat, lng, radiusKm: 5 }),
       });
       const data = await res.json();
+      
       if (data.success && data.volunteer) {
         // Show buddy marker
         const buddyLatLng = {
@@ -101,11 +109,24 @@ document.addEventListener("DOMContentLoaded", function () {
             scaledSize: new google.maps.Size(32, 32),
           },
         });
-        alert(
-          `Buddy found!\nName: ${data.volunteer.name}\nLocation: (${data.volunteer.lat}, ${data.volunteer.lon})`
+        
+        // Create buddy request in database
+        const requestData = await window.createBuddyRequest(
+          lat,
+          lng,
+          destLatLng ? destLatLng.lat : null,
+          destLatLng ? destLatLng.lng : null,
+          address || 'No destination specified',
+          data.volunteer.id
         );
+        
+        if (requestData) {
+          statusDiv.innerHTML = `<span style="color: orange;">📤 Request sent to ${data.volunteer.name}. Waiting for response...</span>`;
+        } else {
+          statusDiv.innerHTML = '<span style="color: red;">Failed to send request. Please try again.</span>';
+        }
       } else {
-        alert(data.message || "No buddy found nearby.");
+        statusDiv.innerHTML = '<span style="color: red;">No buddy found nearby. Please try again later.</span>';
       }
     });
   }
