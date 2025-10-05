@@ -149,79 +149,83 @@ function getDistance(lat1, lng1, lat2, lng2) {
   return R * c;
 }
 
-// SIMPLIFIED Matching endpoint: Uses in-memory volunteers array for matching
-// Location data is still stored in database, but matching happens locally
-app.post("/request-help", (req, res) => {
+// DATABASE-BASED Matching endpoint: Queries buddy_live_locations and returns ALL nearby buddies
+// This works in production even after server restarts
+app.post("/request-help", async (req, res) => {
   const { lat, lng, radiusKm = 5 } = req.body;
   
   console.log(`[MATCH] Request from (${lat}, ${lng}) with radius ${radiusKm}km`);
-  console.log(`[MATCH] Available volunteers in memory:`, volunteers.length);
   
-  // Filter available volunteers by radius (using in-memory array)
-  const available = volunteers.filter(v => v.available === true);
-  console.log(`[MATCH] Available buddies:`, available.length);
-  
-  if (available.length === 0) {
-    return res.json({
-      success: false,
-      message: "No volunteers available. Please ensure buddies are online and have shared their location.",
-    });
-  }
-  
-  const nearby = available.filter(
-    (buddy) => getDistance(lat, lng, buddy.lat, buddy.lng) <= radiusKm
-  );
-  
-  console.log(`[MATCH] Nearby buddies within ${radiusKm}km:`, nearby.length);
-  
-  if (nearby.length === 0) {
-    return res.json({
-      success: false,
-      message: `No volunteers available within ${radiusKm}km. Try increasing the search radius.`,
-    });
-  }
-  
-  // Find closest buddy
-  let closest = nearby[0];
-  let minDist = getDistance(lat, lng, closest.lat, closest.lng);
-  
-  for (let b of nearby) {
-    const dist = getDistance(lat, lng, b.lat, b.lng);
-    if (dist < minDist) {
-      closest = b;
-      minDist = dist;
+  try {
+    // Query database for recent buddy locations (within last 5 minutes)
+    // Get the most recent location for each buddy
+    const result = await pool.query(`
+      SELECT DISTINCT ON (bll.buddy_id) 
+        bll.buddy_id as id,
+        b.name,
+        bll.lat,
+        bll.lon,
+        b.available,
+        bll.updated_at
+      FROM buddy_live_locations bll
+      INNER JOIN buddies b ON b.id = bll.buddy_id
+      WHERE b.available = true
+        AND bll.updated_at > NOW() - INTERVAL '5 minutes'
+      ORDER BY bll.buddy_id, bll.updated_at DESC
+    `);
+    
+    const availableBuddies = result.rows;
+    console.log(`[MATCH] Available buddies in database:`, availableBuddies.length);
+    
+    if (availableBuddies.length === 0) {
+      return res.json({
+        success: false,
+        message: "No volunteers available. Please ensure buddies are online and have shared their location.",
+      });
     }
-  }
-  
-  console.log(`[MATCH] Found closest buddy: ${closest.name} at ${minDist.toFixed(2)}km`);
-  
-  // Mark buddy as unavailable in memory
-  const idx = volunteers.findIndex(v => v.id === closest.id);
-  if (idx > -1) {
-    volunteers[idx].available = false;
-  }
-  
-  // Create request in memory
-  const reqId = "req_" + Date.now();
-  requests.push({
-    id: reqId,
-    clientLat: lat,
-    clientLng: lng,
-    volunteerId: closest.id,
-    status: "pending",
-  });
-  
-  res.json({ 
-    success: true, 
-    requestId: reqId, 
-    volunteer: {
-      id: closest.id,
-      name: closest.name,
-      lat: closest.lat,
-      lon: closest.lng,
-      distance: minDist
+    
+    // Filter by radius and calculate distances
+    const nearby = [];
+    for (const buddy of availableBuddies) {
+      const dist = getDistance(lat, lng, parseFloat(buddy.lat), parseFloat(buddy.lon));
+      if (dist <= radiusKm) {
+        nearby.push({
+          id: buddy.id,
+          name: buddy.name,
+          lat: parseFloat(buddy.lat),
+          lon: parseFloat(buddy.lon),
+          distance: dist
+        });
+      }
     }
-  });
+    
+    console.log(`[MATCH] Nearby buddies within ${radiusKm}km:`, nearby.length);
+    
+    if (nearby.length === 0) {
+      return res.json({
+        success: false,
+        message: `No volunteers available within ${radiusKm}km. Try increasing the search radius.`,
+      });
+    }
+    
+    // Sort by distance (closest first)
+    nearby.sort((a, b) => a.distance - b.distance);
+    
+    console.log(`[MATCH] Found ${nearby.length} nearby buddies. Closest: ${nearby[0].name} at ${nearby[0].distance.toFixed(2)}km`);
+    
+    // Return ALL nearby buddies (not just the closest)
+    res.json({ 
+      success: true,
+      buddies: nearby,
+      count: nearby.length,
+      // For backwards compatibility, also return the closest as "volunteer"
+      volunteer: nearby[0]
+    });
+    
+  } catch (err) {
+    console.error("DB error in /request-help:", err);
+    res.status(500).json({ success: false, message: "Server error while finding buddies." });
+  }
 });
 
 // Volunteer response endpoint (accept/decline)

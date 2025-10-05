@@ -88,40 +88,45 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
       
-      // Call Supabase to find buddy
+      // Call server to find ALL nearby buddies
       const data = await window.findNearbyBuddy(lat, lng, 5);
       
-      if (data.success && data.volunteer) {
-        // Show buddy marker
+      if (data.success && data.buddies && data.buddies.length > 0) {
+        // Show marker for closest buddy
+        const closestBuddy = data.buddies[0];
         const buddyLatLng = {
-          lat: data.volunteer.lat,
-          lng: data.volunteer.lon,
+          lat: closestBuddy.lat,
+          lng: closestBuddy.lon,
         };
         if (buddyMarker) buddyMarker.setMap(null);
         buddyMarker = new google.maps.Marker({
           position: buddyLatLng,
           map,
-          title: "Buddy Location",
+          title: "Closest Buddy",
           icon: {
             url: "data:image/svg+xml;utf8,<svg width='32' height='32' xmlns='http://www.w3.org/2000/svg'><circle cx='16' cy='16' r='12' fill='%2300c853' stroke='white' stroke-width='3'/><text x='16' y='21' font-size='14' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>B</text></svg>",
             scaledSize: new google.maps.Size(32, 32),
           },
         });
         
-        // Create buddy request in database
-        const requestData = await window.createBuddyRequest(
-          lat,
-          lng,
-          destLatLng ? destLatLng.lat : null,
-          destLatLng ? destLatLng.lng : null,
-          address || 'No destination specified',
-          data.volunteer.id
-        );
+        // Create buddy requests for ALL nearby buddies
+        let successCount = 0;
+        for (const buddy of data.buddies) {
+          const requestData = await window.createBuddyRequest(
+            lat,
+            lng,
+            destLatLng ? destLatLng.lat : null,
+            destLatLng ? destLatLng.lng : null,
+            address || 'No destination specified',
+            buddy.id
+          );
+          if (requestData) successCount++;
+        }
         
-        if (requestData) {
-          statusDiv.innerHTML = `<span style="color: orange;">📤 Request sent to ${data.volunteer.name}. Waiting for response...</span>`;
+        if (successCount > 0) {
+          statusDiv.innerHTML = `<span style="color: orange;">📤 Request sent to ${successCount} nearby ${successCount === 1 ? 'buddy' : 'buddies'}. Waiting for response...</span>`;
         } else {
-          statusDiv.innerHTML = '<span style="color: red;">Failed to send request. Please try again.</span>';
+          statusDiv.innerHTML = '<span style="color: red;">Failed to send requests. Please try again.</span>';
         }
       } else {
         statusDiv.innerHTML = '<span style="color: red;">No buddy found nearby. Please try again later.</span>';
