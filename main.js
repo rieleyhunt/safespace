@@ -88,13 +88,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
       
-      // Call backend to find buddy
-      const res = await fetch("/request-help", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lat, lng, radiusKm: 5 }),
-      });
-      const data = await res.json();
+      // Call Supabase to find buddy
+      const data = await window.findNearbyBuddy(lat, lng, 5);
       
       if (data.success && data.volunteer) {
         // Show buddy marker

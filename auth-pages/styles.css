@@ -1,3 +1,17 @@
+@media (max-width: 600px) {
+    .d-flex.gap-2 {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        align-items: stretch !important;
+    }
+    .top-bar-buttons {
+        display: block;
+        width: 100%;
+        margin: 0 0 8px 0;
+        text-align: center;
+        box-sizing: border-box;
+    }
+}
 /* Reset and Base Styles */
 
 /* Merge from main styles.css */
